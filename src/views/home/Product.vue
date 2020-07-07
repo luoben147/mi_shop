@@ -57,17 +57,12 @@
           后置960帧电影般超慢动作视频，将眨眼间的美妙展现得淋漓尽致！
           <br />更能AI 精准分析视频内容，15个场景智能匹配背景音效。
         </p>
-        <div class="video-bg" @click="showSlide=true"></div>
+        <div class="video-bg" @click="showSlide='slideDown'"></div>
         <div class="video-box">
-          <div class="overlay" v-if="showSlide"></div>
-          <div class="video" :class="{'slide':showSlide}">
+          <div class="overlay" v-if="showSlide=='slideDown'"></div>
+          <div class="video" :class="showSlide">
             <span class="icon-close" @click="closeVideo"></span>
-            <video id="video"
-              src="/imgs/product/video.mp4"
-              muted
-              autoplay
-              controls="controls"
-            ></video>
+            <video id="video" src="/imgs/product/video.mp4" muted autoplay controls="controls"></video>
           </div>
         </div>
       </div>
@@ -87,7 +82,7 @@ export default {
   },
   data() {
     return {
-      showSlide: false, //控制动画效果
+      showSlide: "", //控制动画效果
       //轮播图参数配置
       swiperOptions: {
         autoplay: {
@@ -107,7 +102,10 @@ export default {
   },
   methods: {
     closeVideo() {
-      this.showSlide = false;
+      this.showSlide = "slideUp";
+      setTimeout(() => {
+        this.showSlide = "";
+      }, 600);
       let video = document.getElementById("video");
       if (!video) {
         return false;
@@ -199,6 +197,29 @@ export default {
           opacity: 0.4;
           z-index: 10;
         }
+
+        //CSS3 动画属性（Animation）
+        //@keyframes  规定动画。
+        @keyframes slideDown {
+          from {
+            top: -50%;
+            opacity: 0;
+          }
+          to {
+            top: 50%;
+            opacity: 1;
+          }
+        }
+        @keyframes slideUp {
+          from {
+            top: 50%;
+            opacity: 1;
+          }
+          to {
+            top: -50%;
+            opacity: 0;
+          }
+        }
         .video {
           width: 1000px;
           height: 536px;
@@ -207,11 +228,13 @@ export default {
           left: 50%;
           transform: translate(-50%, -50%);
           z-index: 10;
-          opacity: 0;
-          transition: all 0.6s;
-          &.slide {
+          opacity: 1;
+          &.slideDown {
+            animation: slideDown 0.6s linear;
             top: 50%;
-            opacity: 1;
+          }
+          &.slideUp {
+            animation: slideUp 0.6s linear;
           }
           .icon-close {
             position: absolute;
@@ -224,7 +247,7 @@ export default {
           video {
             width: 100%;
             height: 100%;
-            object-fit: cover;// 覆盖原生组件样式
+            object-fit: cover; // 覆盖原生组件样式
             outline: none;
           }
         }
