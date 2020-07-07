@@ -106,7 +106,7 @@ export default {
     },
     //获取购物车里数量
     getCartCount(){
-      getCartCnt().then(res=>{
+      getCartCnt().then((res=0)=>{
         this.$store.dispatch('saveCartCount', res)
       })
     }

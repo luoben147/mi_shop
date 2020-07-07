@@ -1,8 +1,8 @@
 <template>
   <div class="product">
-    <product-param>
+    <product-param :title="'小米8'">
       <template v-slot:buy>
-        <button class="btn">立即购买</button>
+        <button class="btn" @click="buy">立即购买</button>
       </template>
     </product-param>
     <div class="container">
@@ -58,8 +58,8 @@
           <br />更能AI 精准分析视频内容，15个场景智能匹配背景音效。
         </p>
         <div class="video-bg" @click="showSlide='slideDown'"></div>
-        <div class="video-box">
-          <div class="overlay" v-if="showSlide=='slideDown'"></div>
+        <div class="video-box" v-show="showSlide">
+          <div class="overlay" ></div>
           <div class="video" :class="showSlide">
             <span class="icon-close" @click="closeVideo"></span>
             <video id="video" src="/imgs/product/video.mp4" muted autoplay controls="controls"></video>
@@ -100,7 +100,21 @@ export default {
       }
     };
   },
+  mounted() {
+    this.getProduct();
+  },
   methods: {
+    getProduct() {
+      let id = this.$route.params.id;
+      // this.axios.get(`/products/${id}`).then(res => {
+      //   this.product = res;
+      // });
+    },
+    buy(){
+       let id = this.$route.params.id
+      // this.$router.push(`/detail/${id}`)
+      this.$router.push(`/detail/10000226`)
+    },
     closeVideo() {
       this.showSlide = "slideUp";
       setTimeout(() => {
