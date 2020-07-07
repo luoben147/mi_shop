@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import Login from '@/views/Login'
 import Home from '@/views/home/Home'
 import Index from '@/views/home/Index'
 import Product from '@/views/home/Product'
@@ -34,6 +35,11 @@ const routes = [
         component: Detail,
       }
     ]
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login,
   },
   {
     path: '/cart',

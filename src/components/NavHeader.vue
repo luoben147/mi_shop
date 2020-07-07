@@ -14,7 +14,7 @@
           <a href="javascript:;" v-if="!username">注册</a>
           <a href="javascript:;" v-if="username">我的订单</a>
           <a href="javascript:;" class="my-cart" @click="goToCart">
-            <span class="icon-cart"></span>购物车
+            <span class="icon-cart"></span>购物车({{ cartCount }})
           </a>
         </div>
       </div>
@@ -65,7 +65,7 @@ export default {
   name: "nav-header",
   data() {
     return {
-      username: "",
+      //username: "",
       serviceList: [],
       allProductList: [],
       curProductList: []
@@ -80,6 +80,15 @@ export default {
   },
   mounted() {
     this.getProductList();
+    this.getCartCount();
+  },
+  computed: {
+    username() {
+      return this.$store.state.username
+    },
+    cartCount() {
+      return this.$store.state.cartCount
+    }
   },
   methods: {
     getProductList() {
@@ -94,6 +103,12 @@ export default {
     // 跳转到购物车
     goToCart(){
       this.$router.push('/cart');
+    },
+    //获取购物车里数量
+    getCartCount(){
+      getCartCnt().then(res=>{
+        this.$store.dispatch('saveCartCount', res)
+      })
     }
   }
 };
@@ -121,6 +136,7 @@ export default {
         background-color: #ff6600;
         text-align: center;
         color: #ffffff;
+        margin-right: 0px;
         .icon-cart {
           @include bgImg(16px, 12px, "/imgs/icon-cart-checked.png");
           margin-right: 4px;

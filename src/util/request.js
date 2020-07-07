@@ -1,4 +1,5 @@
 import axios from 'axios'
+import qs from 'qs'
 //import env from '@/env'
 
 const http = axios.create({
@@ -7,7 +8,7 @@ const http = axios.create({
   timeout: 1000 * 15,
   withCredentials: true,
   headers: {
-    'Content-Type': 'application/json; charset=utf-8'
+    'Content-Type': 'application/x-www-form-urlencoded'
   }
 })
 
@@ -15,7 +16,12 @@ const http = axios.create({
  * 请求拦截
  */
 http.interceptors.request.use(config => {
-  //config.headers['token'] = Vue.cookie.get('token') // 请求头带上token
+  //config.headers.Authorization = this.$cookies.get('mi-session-id'); // 请求头带上token
+  if (config.method === 'post' || config.method === 'put') {
+    config.data = qs.stringify({
+      ...config.data
+    })
+  }
   return config
 }, error => {
   return Promise.reject(error)
@@ -35,9 +41,9 @@ http.interceptors.response.use(response => {
     } else {
       //Vue.prototype.$message.error(meta.msg)
       alert(meta.msg)
-      return new Promise(() => { })
-      // return Promise.reject(meta);
+      return Promise.reject(meta);
     }
+    return Promise.reject(meta);
   }
   return data;
 }, error => {
