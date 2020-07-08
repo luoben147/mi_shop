@@ -61,6 +61,8 @@ export default {
         getUserInfo().then(res => {
           this.$cookies.set("userId", res.userId, 60 * 60 * 24 * 7);
           //TODO  保存用户信息
+          this.$store.dispatch('saveUserName', res.username)
+          this.$store.dispatch('saveCartCount', res.cartCnt)
           // 通过编程式导航跳转到后台主页
           this.$router.push("/index");
         });

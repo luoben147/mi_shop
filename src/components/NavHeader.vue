@@ -10,11 +10,13 @@
         </div>
         <div class="topbar-user">
           <a href="javascript:;" v-if="username">{{username}}</a>
-           <a href="javascript:;" v-if="!username" @click="login">登录</a>
+          <a href="javascript:;" v-if="!username" @click="login">登录</a>
           <a href="javascript:;" v-if="!username">注册</a>
+          <a href="javascript:;" v-if="username" @click="logout">退出</a>
           <a href="javascript:;" v-if="username">我的订单</a>
           <a href="javascript:;" class="my-cart" @click="goToCart">
-            <span class="icon-cart"></span>购物车({{ cartCount }})
+            <span class="icon-cart"></span>
+            购物车({{ cartCount }})
           </a>
         </div>
       </div>
@@ -65,17 +67,16 @@ export default {
   name: "nav-header",
   data() {
     return {
-      //username: "",
       serviceList: [],
       allProductList: [],
       curProductList: []
     };
   },
-  filters:{
+  filters: {
     //金额过滤器
     currency(val) {
-      if(!val) return '0.00';
-      return '￥'+val.toFixed(2)+'元';
+      if (!val) return "0.00";
+      return "￥" + val.toFixed(2) + "元";
     }
   },
   mounted() {
@@ -84,10 +85,10 @@ export default {
   },
   computed: {
     username() {
-      return this.$store.state.username
+      return this.$store.state.username;
     },
     cartCount() {
-      return this.$store.state.cartCount
+      return this.$store.state.cartCount;
     }
   },
   methods: {
@@ -96,19 +97,25 @@ export default {
         this.serviceList = res;
       });
     },
-     // 跳转到登录页面
+    // 跳转到登录页面
     login() {
-      this.$router.push('/login')
+      this.$router.push("/login");
     },
     // 跳转到购物车
-    goToCart(){
-      this.$router.push('/cart');
+    goToCart() {
+      this.$router.push("/cart");
     },
     //获取购物车里数量
-    getCartCount(){
-      getCartCnt().then((res=0)=>{
-        this.$store.dispatch('saveCartCount', res)
-      })
+    getCartCount() {
+      getCartCnt().then((res = 0) => {
+        this.$store.dispatch("saveCartCount", res);
+      });
+    },
+    logout() {
+      postLogout().then(() => {
+        this.$store.dispatch("saveUserName", "");
+        this.$store.dispatch("saveCartCount", 0);
+      });
     }
   }
 };
