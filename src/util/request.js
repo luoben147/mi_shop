@@ -35,12 +35,9 @@ http.interceptors.response.use(response => {
   if (meta.status !== 200) { 
     if (meta.status === 403) { //没登录
       if (location.hash != '#/index') {
-        alert("去登录！")
         window.location.href = '/#/login'
       }
     } else {
-      //Vue.prototype.$message.error(meta.msg)
-      alert(meta.msg)
       return Promise.reject(meta);
     }
     return Promise.reject(meta);

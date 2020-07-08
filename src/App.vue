@@ -8,7 +8,9 @@
 import { getUserInfo } from "@/api/index.js";
 export default {
   mounted() {
-    this.getUserInfo();
+    if (this.$cookie.get("userId")) {
+      this.getUserInfo();
+    }
   },
   methods: {
     getUserInfo() {
@@ -24,7 +26,7 @@ export default {
   }
 };
 </script>
-<style>
+<style lang="scss">
 @import "./assets/css/reset.scss";
 @import "./assets/css/base.scss";
 </style>

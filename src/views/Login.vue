@@ -39,13 +39,13 @@ import { postLogin, getUserInfo } from "@/api/index.js";
 export default {
   data() {
     return {
-      username: '',
-      password: '',
+      username: "",
+      password: "",
       userId: "",
       loginForm: {
-        username: 'rzcoding',
-        password: 'rzcoding'
-      },
+        username: "rzcoding",
+        password: "rzcoding"
+      }
     };
   },
   methods: {
@@ -54,23 +54,24 @@ export default {
       new Promise((resolve, reject) => {
         postLogin(this.loginForm).then(res => {
           let token = res;
-          this.$cookies.set('mi-session-id', token, 60 * 60 * 24 * 7);
+          this.$cookie.set("mi-session-id", token, {expires:60 * 60 * 24 * 7});
           resolve();
         });
       }).then(() => {
         getUserInfo().then(res => {
-          this.$cookies.set("userId", res.userId, 60 * 60 * 24 * 7);
+          this.$cookie.set("userId", res.userId, {expires:'Session'});
           //TODO  保存用户信息
-          this.$store.dispatch('saveUserName', res.username)
-          this.$store.dispatch('saveCartCount', res.cartCnt)
+          this.$store.dispatch("saveUserName", res.username);
+          this.$store.dispatch("saveCartCount", res.cartCnt);
           // 通过编程式导航跳转到后台主页
-          this.$router.push("/index");
+          this.$router.push({
+            name: "Index",
+            params: {
+              from: "login"
+            }
+          });
         });
       });
-
-      
-
-
     },
     register() {}
   }

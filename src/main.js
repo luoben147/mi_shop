@@ -3,7 +3,7 @@ import router from './router'
 import store from './store/index'
 import App from './App.vue'
 
-import VueCookies from 'vue-cookies'
+import VueCookie from 'vue-cookie'
 import VueLazyLoad  from 'vue-lazyload'
 import './plugins/element.js'
 import 'element-ui/lib/theme-chalk/index.css'
@@ -20,7 +20,7 @@ Vue.use(VueLazyLoad,{
   // 加载显示图片
   loading: '/imgs/loading-svg/loading-bars.svg'
 });
-Vue.use(VueCookies)
+Vue.use(VueCookie)
 Vue.config.productionTip = false
 
 new Vue({
