@@ -1,6 +1,6 @@
 <template>
   <div class="detail">
-    <product-param :title="productInfo.name"></product-param>
+    <product-param v-bind:title="product.name"></product-param>
     <div class="wrapper">
       <div class="container clearfix">
         <div class="swiper">
@@ -22,51 +22,41 @@
           </swiper>
         </div>
         <div class="content">
-          <h2 class="item-title">{{productInfo.name}}</h2>
-          <p class="item-info" v-html="productInfo.desc">
+          <h2 class="item-title">{{product.name}}</h2>
+          <p class="item-info">
             相机全新升级 / 960帧超慢动作 / 手持超级夜景 / 全球首款双频GPS / 骁龙845处理器 / 红
             <br />外人脸解锁 / AI变焦双摄 / 三星 AMOLED 屏
           </p>
           <div class="delivery">小米自营</div>
           <div class="item-price">
-            1699元
+            {{product.price}}元
             <span class="del">1999元</span>
           </div>
           <div class="line"></div>
-          <!-- 收货地址 -->
           <div class="item-addr">
             <i class="icon-loc"></i>
             <div class="addr">北京 北京市 朝阳区 安定门街道</div>
             <div class="stock">有现货</div>
           </div>
-          <!-- 商品属性 -->
-          <div class="item-attr-info">
-            <div
-              class="item-attr"
-              v-for="(item, index) in productInfo.productAttrList"
-              :key="index"
-            >
-              <h2>选择{{ item.attrName }}</h2>
-              <ul class="product-attrs">
-                <li
-                  class="product-attr"
-                  :class="{ checked: attrIds.includes(attr.propId) }"
-                  v-for="(attr, attrIndex) in item.attrVals"
-                  :key="attrIndex"
-                  @click="selectAttr(item.attrName, attr.propId)"
-                >{{ attr.attrVal }}-{{attr.propId}}</li>
-              </ul>
+          <div class="item-version clearfix">
+            <h2>选择版本</h2>
+            <div class="phone fl" :class="{'checked':version==1}" @click="version=1">6GB+64GB 全网通</div>
+            <div class="phone fr" :class="{'checked':version==2}" @click="version=2">4GB+64GB 移动4G</div>
+          </div>
+          <div class="item-color">
+            <h2>选择颜色</h2>
+            <div class="phone checked">
+              <span class="color"></span>
+              深空灰
             </div>
           </div>
-          <!--价格  -->
           <div class="item-total">
             <div class="phone-info clearfix">
-              <div class="fl">{{ goodsInfo.name }}</div>
-              <div class="fr">{{ goodsInfo.price }}元</div>
+              <div class="fl">{{product.name}} {{version==1?'6GB+64GB 全网通':'4GB+64GB 移动4G'}} 深灰色</div>
+              <div class="fr">{{product.price}}元</div>
             </div>
-            <div class="phone-total">总计：{{goodsInfo.price}}元</div>
+            <div class="phone-total">总计：{{product.price}}元</div>
           </div>
-          <!--  -->
           <div class="btn-group">
             <a href="javascript:;" class="btn btn-huge fl" @click="addCart">加入购物车</a>
           </div>
@@ -116,11 +106,10 @@ export default {
           prevEl: ".swiper-button-prev"
         }
       },
-      productInfo: {},
-      goodsInfo: {},
-      goodsAttrs: [],
-      attrIds: [],
-      illegalClick: false
+      id: this.$route.params.id, //获取商品ID
+      err: "",
+      version: 1, //商品版本切换
+      product: {} //商品信息
     };
   },
   created() {
@@ -128,74 +117,16 @@ export default {
   },
   methods: {
     getProduct() {
-      let proId = this.$route.params.id;
-      getProductDetail(proId).then(res => {
-        this.productInfo = res;
-        this.goodsInfo = res.goodsList[0];
-        this.goodsAttrs = this.goodsInfo.goodsAttrs;
-        this.goodsAttrs.forEach(e => {
-          this.attrIds.push(e.attrId);
-        });
+      getProductDetail(this.id).then(res => {
+        this.product = res;
       });
-    },
-    //选择属性
-    selectAttr(attrName, propId) {
-      if (this.illegalClick || this.attrIds.includes(propId)) {
-        return ;
-      }
-      // 构建选择的商品属性
-      let selGoodsAttrs = [];
-      this.goodsAttrs.forEach(e => {
-        let goodsAttr = {};
-        goodsAttr.attrName = e.attrName;
-        goodsAttr.attrId = e.attrId;
-        if (e.attrName === attrName) {
-          goodsAttr.attrId = propId;
-        }
-        selGoodsAttrs.push(goodsAttr);
-      });
-
-      let notMatch = true;
-      this.productInfo.goodsList.forEach(goods => {
-        // 遍历匹配商品属性
-        let cnt = 0;
-        goods.goodsAttrs.forEach(attr => {
-          selGoodsAttrs.forEach(selAttr => {
-            if (
-              attr.attrName === selAttr.attrName &&
-              attr.attrId === selAttr.attrId
-            ) {
-              cnt = cnt + 1;
-            }
-          });
-        });
-
-        // 所有属性都匹配成功 替换具体商品
-        if (cnt === selGoodsAttrs.length) {
-          this.goodsInfo = goods;
-          this.goodsAttrs = this.goodsInfo.goodsAttrs;
-          this.attrIds.splice(0, this.attrIds.length);
-          this.goodsAttrs.forEach(e => {
-            this.attrIds.push(e.attrId);
-          });
-          notMatch = false;
-          return;
-        }
-      });
-      if (notMatch) {
-        this.illegalClick = true;
-        this.$message.warning({
-          message: "没货!",
-          center: true,
-          duration: 800,
-          onClose: () => {
-            this.illegalClick = false;
-          }
-        });
-      }
     },
     addCart() {
-      addCart(this.goodsInfo.goodsId).then(() => {
+      addCart({
+        productId:this.id,
+        selected: true
+      }).then((res={cartProductVoList:0}) => {
+        this.$store.dispatch('saveCartCount',res.cartTotalQuantity);
         this.$router.push("/cart");
       });
     }
@@ -210,8 +141,8 @@ export default {
   .wrapper {
     .swiper {
       float: left;
-      width: 560px;
-      height: 560px;
+      width: 642px;
+      height: 617px;
       margin-top: 5px;
       img {
         width: 100%;
@@ -221,7 +152,7 @@ export default {
     .content {
       float: right;
       width: 584px;
-      //height: 870px;
+      height: 870px;
       .item-title {
         font-size: 28px;
         padding-top: 30px;
@@ -280,34 +211,39 @@ export default {
           color: #ff6700;
         }
       }
-      .item-attr-info {
+      .item-version,
+      .item-color {
         margin-top: 30px;
-        .item-attr {
-          margin-bottom: 10px;
-          h2 {
-            font-size: 18px;
-            margin-bottom: 12px;
+        h2 {
+          font-size: 18px;
+          margin-bottom: 20px;
+        }
+      }
+      .item-version,
+      .item-color {
+        .phone {
+          width: 287px;
+          height: 50px;
+          line-height: 50px;
+          font-size: 16px;
+          color: #333333;
+          border: 1px solid #e5e5e5;
+          box-sizing: border-box;
+          text-align: center;
+          cursor: pointer;
+          span {
+            color: #666666;
+            margin-left: 15px;
           }
-          .product-attrs {
-            display: flex;
-            justify-content: space-between;
-            flex-flow: row wrap;
-            .product-attr {
-              width: 287px;
-              height: 50px;
-              line-height: 50px;
-              font-size: 16px;
-              margin-bottom: 12px;
-              color: #333;
-              border: 1px solid #e5e5e5;
-              box-sizing: border-box;
-              text-align: center;
-              cursor: pointer;
-              &.checked {
-                border: 1px solid #ff6600;
-                color: #ff6600;
-              }
-            }
+          .color {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background-color: #666666;
+          }
+          &.checked {
+            border: 1px solid #ff6600;
+            color: #ff6600;
           }
         }
       }
@@ -316,7 +252,6 @@ export default {
         background: #fafafa;
         padding: 24px 33px 29px 30px;
         font-size: 14px;
-
         margin-top: 50px;
         margin-bottom: 30px;
         box-sizing: border-box;
@@ -325,9 +260,6 @@ export default {
           color: #ff6600;
           margin-top: 18px;
         }
-      }
-      .btn-group {
-        padding-bottom: 80px;
       }
     }
   }

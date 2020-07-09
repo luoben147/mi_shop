@@ -26,3 +26,4 @@ Vue.use(Cascader)
 
 
 Vue.prototype.$message = Message
+Vue.prototype.$confirm=MessageBox.confirm

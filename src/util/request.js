@@ -4,45 +4,25 @@ import qs from 'qs'
 
 const http = axios.create({
   //baseURL: env.baseURL, //根据环境变量获取不同环境的地址
-  baseURL: '/mi', //根据环境变量获取不同环境的地址
+  baseURL: '/api', //根据环境变量获取不同环境的地址
   timeout: 1000 * 15,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded'
-  }
+  withCredentials: true
 })
 
-/**
- * 请求拦截
- */
-http.interceptors.request.use(config => {
-  //config.headers.Authorization = this.$cookies.get('mi-session-id'); // 请求头带上token
-  if (config.method === 'post' || config.method === 'put') {
-    config.data = qs.stringify({
-      ...config.data
-    })
-  }
-  return config
-}, error => {
-  return Promise.reject(error)
-})
 
 /**
  * 响应拦截
  */
 http.interceptors.response.use(response => {
-  let { meta, data } = response.data;
-  if (meta.status !== 200) { 
-    if (meta.status === 403) { //没登录
-      if (location.hash != '#/index') {
-        window.location.href = '/#/login'
-      }
-    } else {
-      return Promise.reject(meta);
-    }
-    return Promise.reject(meta);
+  let res = response.data;
+  if (res.status == 0) {
+    return res.data;
+  } else if (res.status == 10) {
+    window.location.href = '/#/login';
+    return Promise.reject(res);
+  } else {
+    return Promise.reject(res);
   }
-  return data;
 }, error => {
   return Promise.reject(error)
 })

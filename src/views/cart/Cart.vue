@@ -2,7 +2,7 @@
   <div class="cart">
     <order-header title="我的购物车">
       <template v-slot:tip>
-        <span>温馨提示：产品是否购买成功，以最终下单为准，请尽快结算</span>
+        <span>温馨提示：产品是否购买成功，以最终下单为准哦，请尽快结算</span>
       </template>
     </order-header>
     <div class="wrapper">
@@ -10,7 +10,7 @@
         <div class="cart-box">
           <ul class="cart-item-head">
             <li class="col-1">
-              <span class="checkbox" :class="{'checked':allChecked}" @click="toggleAll"></span>全选
+              <span class="checkbox" v-bind:class="{'checked':allChecked}" @click="toggleAll"></span>全选
             </li>
             <li class="col-3">商品名称</li>
             <li class="col-1">单价</li>
@@ -18,43 +18,42 @@
             <li class="col-1">小计</li>
             <li class="col-1">操作</li>
           </ul>
-          <ul class="cart-item-list" v-for="(item,i) in  cartList" :key="i">
-            <li class="cart-item">
+          <ul class="cart-item-list">
+            <li class="cart-item" v-for="(item,index) in list" v-bind:key="index">
               <div class="item-check">
                 <span
                   class="checkbox"
-                  :class="{ 'checked': item.selected === 1 }"
+                  v-bind:class="{'checked':item.productSelected}"
                   @click="updateCart(item)"
                 ></span>
               </div>
               <div class="item-name">
-                <img v-lazy="item.img + '?thumb=1&w=320&h=320'" alt />
-                <span>{{ item.name }}</span>
+                <img v-lazy="item.productMainImage" alt />
+                <span>{{item.productName + ' , ' + item.productSubtitle}}</span>
               </div>
-              <div class="item-price">{{ item.price }}元</div>
+              <div class="item-price">{{item.productPrice}}</div>
               <div class="item-num">
                 <div class="num-box">
-                  <a href="javascript:;" @click="updateCart(item, '-')">-</a>
+                  <a href="javascript:;" @click="updateCart(item,'-')">-</a>
                   <span>{{item.quantity}}</span>
-                  <a href="javascript:;" @click="updateCart(item, '+')">+</a>
+                  <a href="javascript:;" @click="updateCart(item,'+')">+</a>
                 </div>
               </div>
-              <!-- 应该由后台返回价格，不应前端计算 -->
-              <div class="item-total">{{ item.price*item.quantity }}元</div>
-              <div class="item-del" @click="delProduct(item.id)"></div>
+              <div class="item-total">{{item.productTotalPrice}}</div>
+              <div class="item-del" @click="delProduct(item)"></div>
             </li>
           </ul>
         </div>
         <div class="order-wrap clearfix">
           <div class="cart-tip fl">
-            <a href="/">继续购物</a>
+            <a href="/#/index">继续购物</a>
             共
-            <span>{{cartList.length}}</span>件商品，已选择
-            <span>{{selectedCartCount}}</span>件
+            <span>{{list.length}}</span>件商品，已选择
+            <span>{{checkedNum}}</span>件
           </div>
           <div class="total fr">
             合计：
-            <span>{{totalPrice}}</span>元
+            <span>{{cartTotalPrice}}</span>元
             <a href="javascript:;" class="btn" @click="order">去结算</a>
           </div>
         </div>
@@ -64,31 +63,29 @@
     <nav-footer></nav-footer>
   </div>
 </template>
-
 <script>
 import OrderHeader from "@/components/OrderHeader";
-import NavFooter from "@/components/NavFooter";
 import ServiceBar from "@/components/ServiceBar";
+import NavFooter from "@/components/NavFooter";
 import {
   getCartList,
+  delCart,
   cartSelectAll,
-  updCartCnt,
-  delCart
+  updateCartCount
 } from "@/api/index.js";
 export default {
-  name: "cart",
+  name: "index",
   components: {
     OrderHeader,
-    NavFooter,
-    ServiceBar
+    ServiceBar,
+    NavFooter
   },
   data() {
     return {
+      list: [], //商品列表
       allChecked: false, //是否全选
-      cartList: [], //商品列表
-      totalPrice: 0, //商品总价
-      selectedCartCount: 0, //选中商品数量
-      totalNum: 0 //购物车里的商品总数量
+      cartTotalPrice: 0, //商品总金额
+      checkedNum: 0 //选中商品数量
     };
   },
   mounted() {
@@ -101,74 +98,68 @@ export default {
         this.renderData(res);
       });
     },
-    // 修改购物车数量
+    // 更新购物车数量和购物车单选状态
     updateCart(item, type) {
-      let quantity = item.quantity;
-      let selected = item.selected === 1 ? 1 : 0;
+      let quantity = item.quantity,
+        selected = item.productSelected;
       if (type == "-") {
         if (quantity == 1) {
-          this.$message.warning("商品至少保留1件");
+          this.$message.warning("商品至少保留一件");
           return;
         }
         --quantity;
       } else if (type == "+") {
-        if (quantity > item.stock) {
+        if (quantity > item.productStock) {
           this.$message.warning("购买数量不能超过库存数量");
           return;
         }
         ++quantity;
       } else {
-        selected = item.selected === 1 ? 0 : 1;
+        selected = !item.productSelected;
       }
-      updCartCnt(item.id, { quantity, selected }).then(res => {
+      updateCartCount(item.productId, {
+        quantity,
+        selected
+      }).then(res => {
         this.renderData(res);
       });
     },
-    //删除商品
-    delProduct(id) {
-      delCart(id).then(res => {
+    // 删除购物车商品
+    delProduct(item) {
+      delCart(item.productId).then(res => {
+        this.$message.success("删除成功");
         this.renderData(res);
       });
     },
-    //公共赋值
+    // 控制全选功能
+    toggleAll() {
+      let url = this.allChecked ? "/carts/unSelectAll" : "/carts/selectAll";
+      cartSelectAll(url).then(res => {
+        this.renderData(res);
+      });
+    },
+    // 公共赋值
     renderData(res) {
-      this.cartList = res.CartProducts;
-      this.totalPrice = res.amount;
-      this.selectedCartCount = res.selectedCartCnt;
-      this.totalNum = res.totalCartCnt;
-
-      if (res.selectedCartCnt === res.CartProducts.length) {
-        this.allChecked = true;
-      } else {
-        this.allChecked = false;
-      }
+      this.list = res.cartProductVoList || [];
+      this.allChecked = res.selectedAll;
+      this.cartTotalPrice = res.cartTotalPrice;
+      this.checkedNum = this.list.filter(item => item.productSelected).length;
     },
-    // 去结算
+    // 购物车下单
     order() {
-      let isCheck = this.cartList.every(item => !(item.selected == 1));
+      let isCheck = this.list.every(item => !item.productSelected);
       if (isCheck) {
         this.$message.warning("请选择一件商品");
-        return;
+      } else {
+        this.$router.push("/order/confirm");
       }
-      this.$router.push("/order/confirm");
-    },
-    //全选
-    toggleAll() {
-      if (this.cartList.length === 0) {
-        this.$message.warning("没有商品");
-        return;
-      }
-      let selectAll = this.allChecked ? 0 : 1;
-      cartSelectAll(selectAll).then(res => {
-        this.renderg(res);
-      });
     }
   }
 };
 </script>
 <style lang="scss" scoped>
-@import "~assets/css/config.scss";
-@import "~assets/css/botton.scss";
+@import '~assets/css/config.scss';
+@import '~assets/css/botton.scss';
 .cart {
   .wrapper {
     background-color: #f5f5f5;

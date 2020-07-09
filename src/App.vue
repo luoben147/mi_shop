@@ -17,7 +17,6 @@ export default {
       getUserInfo().then(res => {
         if (res) {
           this.$store.dispatch("saveUserName", res.username);
-          this.$store.dispatch("saveCartCount", res.cartCnt);
         } else {
           this.$cookies.remove("userId");
         }

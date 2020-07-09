@@ -1,14 +1,14 @@
 <template>
   <div class="product">
-    <product-param :title="'小米8'">
+    <product-param :title="product.name">
       <template v-slot:buy>
         <button class="btn" @click="buy">立即购买</button>
       </template>
     </product-param>
     <div class="container">
       <div class="item-bg">
-        <h2>小米8</h2>
-        <h3>小米8 战斗天使</h3>
+        <h2>{{product.name}}</h2>
+        <h3>{{product.subtitle}}</h3>
         <p>
           <a href id>全球首款双频 GP</a>
           <span>|</span>
@@ -21,7 +21,7 @@
         <div class="price">
           <span>
             ￥
-            <em>2599</em>
+            <em>{{product.price}}</em>
           </span>
         </div>
       </div>
@@ -59,7 +59,7 @@
         </p>
         <div class="video-bg" @click="showSlide='slideDown'"></div>
         <div class="video-box" v-show="showSlide">
-          <div class="overlay" ></div>
+          <div class="overlay"></div>
           <div class="video" :class="showSlide">
             <span class="icon-close" @click="closeVideo"></span>
             <video id="video" src="/imgs/product/video.mp4" muted autoplay controls="controls"></video>
@@ -73,6 +73,7 @@
 <script>
 import ProductParam from "@/components/ProductParam";
 import { Swiper, SwiperSlide } from "vue-awesome-swiper";
+import { getProductDetail } from "@/api/index.js";
 export default {
   name: "product",
   components: {
@@ -97,7 +98,8 @@ export default {
           el: ".swiper-pagination",
           clickable: true
         }
-      }
+      },
+      product: {} //商品信息
     };
   },
   mounted() {
@@ -106,14 +108,13 @@ export default {
   methods: {
     getProduct() {
       let id = this.$route.params.id;
-      // this.axios.get(`/products/${id}`).then(res => {
-      //   this.product = res;
-      // });
+      getProductDetail(id).then(res => {
+        this.product = res;
+      });
     },
-    buy(){
-       let id = this.$route.params.id
-      // this.$router.push(`/detail/${id}`)
-      this.$router.push(`/detail/10000226`)
+    buy() {
+      let id = this.$route.params.id;
+      this.$router.push(`/detail/${id}`)
     },
     closeVideo() {
       this.showSlide = "slideUp";

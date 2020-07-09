@@ -27,22 +27,87 @@
           <a href="/#/index"></a>
         </div>
         <div class="header-menu">
-          <div class="item-menu" v-for="(item, index) in serviceList" :key="index">
-            <span v-text="item.cateName">小米手机</span>
+          <div class="item-menu">
+            <span>小米手机</span>
             <div class="children">
               <ul>
-                <li class="product" v-for="(child,j) in item.children" :key="j">
-                  <a :href="`/#/product/${child.productId}`" target="_blank">
+                <li class="product" v-for="(item,index) in phoneList" :key="index">
+                  <a v-bind:href="'/#/product/'+item.id" target="_blank">
                     <div class="pro-img">
-                      <img v-lazy="child.img" />
+                      <img v-lazy="item.mainImage" :alt="item.subtitle" />
                     </div>
-                    <div class="pro-name">{{child.name}}</div>
-                    <div class="pro-price">{{child.price}}</div>
+                    <div class="pro-name">{{item.name}}</div>
+                    <div class="pro-price">{{item.price | currency}}</div>
                   </a>
                 </li>
               </ul>
             </div>
           </div>
+          <div class="item-menu">
+            <span>RedMi红米</span>
+          </div>
+          <div class="item-menu">
+            <span>电视</span>
+            <div class="children">
+              <ul>
+                <li class="product">
+                  <a href target="_blank">
+                    <div class="pro-img">
+                      <img v-lazy="'/imgs/nav-img/nav-3-1.jpg'" alt />
+                    </div>
+                    <div class="pro-name">小米壁画电视 65英寸</div>
+                    <div class="pro-price">6999元</div>
+                  </a>
+                </li>
+                <li class="product">
+                  <a href target="_blank">
+                    <div class="pro-img">
+                      <img v-lazy="'/imgs/nav-img/nav-3-2.jpg'" alt />
+                    </div>
+                    <div class="pro-name">小米全面屏电视E55A</div>
+                    <div class="pro-price">1999元</div>
+                  </a>
+                </li>
+                <li class="product">
+                  <a href target="_blank">
+                    <div class="pro-img">
+                      <img v-lazy="'/imgs/nav-img/nav-3-3.png'" alt />
+                    </div>
+                    <div class="pro-name">小米电视4A 32英寸</div>
+                    <div class="pro-price">699元</div>
+                  </a>
+                </li>
+                <li class="product">
+                  <a href target="_blank">
+                    <div class="pro-img">
+                      <img v-lazy="'/imgs/nav-img/nav-3-4.jpg'" alt />
+                    </div>
+                    <div class="pro-name">小米电视4A 55英寸</div>
+                    <div class="pro-price">1799元</div>
+                  </a>
+                </li>
+                <li class="product">
+                  <a href target="_blank">
+                    <div class="pro-img">
+                      <img v-lazy="'/imgs/nav-img/nav-3-5.jpg'" alt />
+                    </div>
+                    <div class="pro-name">小米电视4A 65英寸</div>
+                    <div class="pro-price">2699元</div>
+                  </a>
+                </li>
+                <li class="product">
+                  <a href target="_blank">
+                    <div class="pro-img">
+                      <img v-lazy="'/imgs/nav-img/nav-3-6.png'" alt />
+                    </div>
+                    <div class="pro-name">查看全部</div>
+                    <div class="pro-price">查看全部</div>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
           <div class="item-menu">
             <a class="other-menu" href="javascript:;">服务</a>
           </div>
@@ -61,15 +126,13 @@
   </div>
 </template>
 <script>
-import { getNavItem, postLogout, getCartCnt } from "@/api/index.js";
+import { getProductList, postLogout, getCartCount } from "@/api/index.js";
 
 export default {
   name: "nav-header",
   data() {
     return {
-      serviceList: [],
-      allProductList: [],
-      curProductList: []
+      phoneList: []
     };
   },
   filters: {
@@ -96,8 +159,11 @@ export default {
   },
   methods: {
     getProductList() {
-      getNavItem().then(res => {
-        this.serviceList = res;
+      getProductList({
+            categoryId:'100012',
+            pageSize:6
+          }).then(res => {
+        this.phoneList = res.list;
       });
     },
     // 跳转到登录页面
@@ -110,16 +176,16 @@ export default {
     },
     //获取购物车里数量
     getCartCount() {
-      getCartCnt().then((res = 0) => {
+      getCartCount().then((res = 0) => {
         this.$store.dispatch("saveCartCount", res);
       });
     },
     logout() {
       postLogout().then(() => {
-        this.$cookie.set('userId','',{expires:'-1'});
-        this.$cookie.set("mi-session-id", "", { expires: "-1" });
+        this.$message.success("退出成功");
+        this.$cookie.set("userId", "", { expires: "-1" });
         this.$store.dispatch("saveUserName", "");
-        this.$store.dispatch("saveCartCount", 0);
+        this.$store.dispatch("saveCartCount", "0");
       });
     }
   }

@@ -14,10 +14,10 @@
             <span>扫码登录</span>
           </h3>
           <div class="input">
-            <input type="text" placeholder="请输入帐号" v-model="loginForm.username" />
+            <input type="text" placeholder="请输入帐号" v-model="username" />
           </div>
           <div class="input">
-            <input type="password" placeholder="请输入密码" v-model="loginForm.password" />
+            <input type="password" placeholder="请输入密码" v-model="password" />
           </div>
           <div class="btn-box">
             <a href="javascript:;" class="btn" @click="login">登录</a>
@@ -25,7 +25,7 @@
           <div class="tips">
             <div class="sms" @click="register">手机短信登录/注册</div>
             <div class="reg">
-              立即注册
+              <span @click="register">立即注册</span>
               <span>|</span>忘记密码？
             </div>
           </div>
@@ -35,45 +35,38 @@
   </div>
 </template>
 <script>
-import { postLogin, getUserInfo } from "@/api/index.js";
+import { postLogin, register } from "@/api/index.js";
 export default {
   data() {
     return {
-      username: "",
-      password: "",
-      userId: "",
-      loginForm: {
-        username: "rzcoding",
-        password: "rzcoding"
-      }
+      username: "luoben",
+      password: "luoben",
+      userId: ""
     };
   },
   methods: {
     login() {
       let { username, password } = this;
-      new Promise((resolve, reject) => {
-        postLogin(this.loginForm).then(res => {
-          let token = res;
-          this.$cookie.set("mi-session-id", token, {expires:60 * 60 * 24 * 7});
-          resolve();
-        });
-      }).then(() => {
-        getUserInfo().then(res => {
-          this.$cookie.set("userId", res.userId, {expires:'Session'});
-          //TODO  保存用户信息
-          this.$store.dispatch("saveUserName", res.username);
-          this.$store.dispatch("saveCartCount", res.cartCnt);
-          // 通过编程式导航跳转到后台主页
-          this.$router.push({
-            name: "Index",
-            params: {
-              from: "login"
-            }
-          });
+      postLogin({ username, password }).then(res => {
+        this.$cookie.set("userId", res.id, { expires: "Session" });
+        this.$store.dispatch("saveUserName", res.username);
+        this.$router.push({
+          name: "Index",
+          params: {
+            from: "login"
+          }
         });
       });
     },
-    register() {}
+    register() {
+      register({
+        username: "luoben",
+        password: "luoben",
+        email: "luoben@163.com"
+      }).then(() => {
+        this.$message.success("注册成功");
+      });
+    }
   }
 };
 </script>
