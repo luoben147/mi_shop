@@ -1,5 +1,6 @@
 import axios from 'axios'
 import qs from 'qs'
+import {Message, MessageBox} from 'element-ui'
 //import env from '@/env'
 
 const http = axios.create({
@@ -21,9 +22,19 @@ http.interceptors.response.use(response => {
     window.location.href = '/#/login';
     return Promise.reject(res);
   } else {
+    Message({
+      message: res.msg,
+      type: 'error',
+      duration: 5 * 1000
+    })
     return Promise.reject(res);
   }
 }, error => {
+  Message({
+    message: error.response.data.message,
+    type: 'error',
+    duration: 5 * 1000
+  })
   return Promise.reject(error)
 })
 

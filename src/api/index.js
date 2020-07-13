@@ -92,7 +92,7 @@ export function getOrder(orderId) {
 
 // 订单列表
 export function getOrderList(param) {
-  return http.get(`order/list`, { params: param })
+  return http.get(`orders`, {params: param})
 }
 
 // 支付
