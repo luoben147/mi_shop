@@ -1,4 +1,5 @@
 # mi_mall
+vue 仿小米商城
 
 ## Project setup
 ```
