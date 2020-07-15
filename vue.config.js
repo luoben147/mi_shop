@@ -10,6 +10,10 @@ module.exports={
             }
         }
     },
+    productionSourceMap: false, // 隐藏打包后的源码
+    outputDir: 'dist', //build输出目录
+    assetsDir: 'assets', //静态资源目录（js, css, img）
+    lintOnSave: false, //是否开启eslint
     devServer:{
         host:'localhost',
         port:8080,
@@ -22,5 +26,9 @@ module.exports={
                 }
             }
         }
+    }
+    ,
+    chainWebpack: config =>{
+        config.plugins.delete('prefetch');
     }
 }

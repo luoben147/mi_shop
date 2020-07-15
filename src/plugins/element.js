@@ -11,7 +11,6 @@ import {
     MessageBox,
     Alert,
     Pagination,
-    Cascader,
 } from 'element-ui'
 Vue.use(Button)
 Vue.use(FormItem)
@@ -22,7 +21,6 @@ Vue.use(Col)
 Vue.use(Dialog)
 Vue.use(Alert)
 Vue.use(Pagination)
-Vue.use(Cascader)
 
 
 Vue.prototype.$message = Message
